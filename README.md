@@ -1,2 +1,2 @@
 # retail_base
-Base Retail Application running on megam 
+Meglytics - Analytics visualization application running on megam 
