@@ -1,0 +1,18 @@
+
+#Header
+subheader.time_line=Time & Line
+subheader.bar_column=Bar & Column
+products.flatten=Area & Pie
+subheader.bubble=Bubble
+
+
+#Chart Labels
+label.line=Line Chart
+label.time=Time Series
+label.bar=Bar Chart
+label.stacked=Stacked Bar Chart
+label.column=Column Chart
+label.bubble=Bubble Chart
+label.combination=Combination Chart
+label.area=Area Chart
+label.pie=Pie Chart
