@@ -25,7 +25,7 @@ object Application extends Controller {
   val RatingFile = "ratings.csv"
 
   val sc = new SparkContext("local[4]", "recommender")
-  sc.addJar("target/scala-2.10/blog-spark-recommendation_2.10-1.0-SNAPSHOT.jar")
+  sc.addJar("target/scala-2.10/meglytics-visualizer-_2.10-1.0-SNAPSHOT.jar")
   val recommender = new Recommender(sc, RatingFile)
 
   // return random amazon page and retry multiple times (in case a page is buggy, we try another one)
