@@ -1,22 +1,43 @@
 package util
-/*
-import model.AmazonRating
-import org.apache.spark.SparkContext
-import org.apache.spark.mllib.recommendation.{ALS, Rating}
-import org.joda.time.{Seconds, DateTime}
-*/
 
+import org.jblas.DoubleMatrix
 import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
 import scala.util.Random
 
-class Recommender(@transient sc: SparkContext, ratings: String, products: String) extends Serializable {
+import org.apache.spark.SparkContext
+import org.joda.time.{Seconds, DateTime}
+
+class Recommender(@transient sc: SparkContext, ratings: RDD[Unit], products: Map[Int, String]) extends Serializable {
  
- val ratings_parse  = sc.textFile(ratings).map {
+ /* println(ratings)
+  val ratings_parse  = sc.textFile(ratings).map {
     line =>
-      val Array(userId, productId, scoreStr) = line.split(",")
-      AllRatedProducts(userId, productId, scoreStr.toDouble)
+      val Array(userId, productId, scoreStr) = line.split("::")
+      AllRatedProducts(userId, prodId, scoreStr.toDouble)
+ }
+  
+val ratings_new = ratings_parse.groupBy(_.prodId)
+* 
+*/
+  val Retries = 3
+  val prodRatings = getRandomProduct
+    
+  val productDict = new Dictionary(ratings.map(_.prodId).distinct.collect)
+
+  val myRatingsRDD = sc.parallelize(prodRatings, 1)
+
+  def getRandomProduct(Retries: Int) = getRandomProductID
+  def getRandomProductID = {
+    
+  val randomProduct = (productDict.getWord(random.nextInt(productDict.size))).toString
+  println("Printing randomProduct")
+  println(randomProduct)
+  if (randomProduct.size < 1) {
+     throw new RuntimeException(s"Check your data please!")
   }
+}
+  
     val numRatings = ratings.count()
     val numUsers = ratings.map(_._2.user).distinct().count()
     val numProducts = ratings.map(_._2.product).distinct().count()
@@ -43,7 +64,7 @@ class Recommender(@transient sc: SparkContext, ratings: String, products: String
 
     println("Training: " + numTraining + ", validation: " + numValidation + ", test: " + numTest)
 
-    // train models and evaluate them on the validation set
+  
 
     val ranks = List(8, 12)
     val lambdas = List(0.1, 10.0)
@@ -79,39 +100,39 @@ class Recommender(@transient sc: SparkContext, ratings: String, products: String
       math.sqrt(test.map(x => (meanRating - x.rating) * (meanRating - x.rating)).mean)
     val improvement = (baselineRmse - testRmse) / baselineRmse * 100
     println("The best model improves the baseline by " + "%1.2f".format(improvement) + "%.")
+    
+    
+    val aptProductIds = myRatings.map(_.product).toSet
+    val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
+    val recommendations = bestModel.get
+      .predict(candidates.map((0, _)))
+      .collect()
+      .sortBy(- _.rating)
+      .take(50)
+    
+      //return the predictions
+      var i = 1
+    println("Products matching the given products:")
+    recommendations.foreach { r =>
+      println("%2d".format(i) + ": " + movies(r.product))
+      i += 1
     }
-
-    // clean up
+      
+      
     sc.stop()
+
 //NEED TO CHANGE THE computeRmse() and get random product from dictionary and compare.
 
   /** Compute RMSE (Root Mean Squared Error). */
   def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long): Double = {
-    val predictions: RDD[Rating] = model.recommendSimilarProducts(data.map(x => (x.user, x.product)))
+    val predictions: RDD[Rating] = model.predict(data.map(x => (x.user, x.product)))
     val predictionsAndRatings = predictions.map(x => ((x.user, x.product), x.rating))
       .join(data.map(x => ((x.user, x.product), x.rating)))
       .values
     math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
   }
-/*
-  /** Load ratings from file. */
-  def loadRatings(path: String): Seq[Rating] = {
-    val lines = Source.fromFile(path).getLines()
-    val ratings = lines.map { line =>
-      val fields = line.split("::")
-      Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble)
-    }.filter(_.rating > 0.0)
-    if (ratings.isEmpty) {
-      sys.error("No ratings provided.")
-    } else {
-      ratings.toSeq
-    }
-  }
-  * 
-  */
- }
  
-  
+}  
   
 /*
   @transient val random = new Random() with Serializable
