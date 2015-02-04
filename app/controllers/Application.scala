@@ -33,31 +33,39 @@ object Application extends Controller {
       .set("spark.executor.memory", "2g")
     val sc = new SparkContext(conf)
 
+ /*  val myfinalRatings
    
-    val myRatings = getRandomProduct
-    //val myRatingsRDD = sc.parallelize(myRatings, 1)
-
-
+    val myRatings = getRandomProducts.map {
+      case (Some(prodId), Some(rating)) =>
+    myfinalRatings.save(AllRatedProducts(userId, prodId, rating))
+    
+      case _ => Future.successful()
+    }
+   */ 
+    
     val ProductsListDir = args(0)
     
-    val ratings = ProductsListDir + "ratings.dat"
 
-    //val ratings = sc.textFile(new File(ProductsListDir, "ratings.dat").toString).map { line =>
-      //val fields = line.split("::")
+    val ratings_initial = sc.textFile(new File(ProductsListDir, "ratings.dat").toString).map { line =>
+      val Array(userId, prodId, scoreStr) = line.split("::")
       // format: (timestamp % 10, Rating(userId, prodId, rating))
       //(fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
-   // }
+     
+    }
+    val ratings = ratings_initial.groupBy(_.prodId)
+                                 .cache()
 
     val products = sc.textFile(new File(ProductsListDir, "productsList.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (prodId, prodName)
       (fields(0).toInt, fields(1))
     }.collect().toMap
+    
 
-    val recommender = new Recommender(sc, ratings, products, myRatings)
+    val recommender = new Recommender(sc, ratings, products)
 
 
-  def getRandomProduct(Retries: Int) = recommender.getRandomProductID
+  
   
  // def getRandomProduct(Retries: Int): Future[AllRatedProducts] = recommender.getRandomProductID
  //to add model later   

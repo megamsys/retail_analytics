@@ -8,21 +8,26 @@ import scala.util.Random
 import org.apache.spark.SparkContext
 import org.joda.time.{Seconds, DateTime}
 
-class Recommender(@transient sc: SparkContext, ratings: String, products: (Int, String), myRatings: String) extends Serializable {
+class Recommender(@transient sc: SparkContext, ratings: RDD[Unit], products: Map[Int, String]) extends Serializable {
  
-  
+ /* println(ratings)
   val ratings_parse  = sc.textFile(ratings).map {
     line =>
       val Array(userId, productId, scoreStr) = line.split("::")
-      AllRatedProducts(userId, productId, scoreStr.toDouble)
+      AllRatedProducts(userId, prodId, scoreStr.toDouble)
  }
-//val ratings_new = ratings.
   
-  val productDict = new Dictionary(ratings_parse.map(_.prodId).distinct.collect)
+val ratings_new = ratings_parse.groupBy(_.prodId)
+* 
+*/
+  val Retries = 3
+  val prodRatings = getRandomProduct
+    
+  val productDict = new Dictionary(ratings.map(_.prodId).distinct.collect)
 
-  val myRatingsRDD = sc.parallelize(myRatings, 1)
+  val myRatingsRDD = sc.parallelize(prodRatings, 1)
 
-  
+  def getRandomProduct(Retries: Int) = getRandomProductID
   def getRandomProductID = {
     
   val randomProduct = (productDict.getWord(random.nextInt(productDict.size))).toString
@@ -33,8 +38,6 @@ class Recommender(@transient sc: SparkContext, ratings: String, products: (Int, 
   }
 }
   
-  
- 
     val numRatings = ratings.count()
     val numUsers = ratings.map(_._2.user).distinct().count()
     val numProducts = ratings.map(_._2.product).distinct().count()
