@@ -1,4 +1,4 @@
-package util
+/*package util
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import dispatch.{url, Http}
@@ -11,3 +11,4 @@ object HttpClient {
     http(svc)
   }
 }
+*/

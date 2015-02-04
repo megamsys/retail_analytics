@@ -28,6 +28,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Application extends Controller {
+  
+  val Retires = 3
+  
 /*  val NumRetries = 3
   val MaxRecommendations = 5
 
@@ -65,7 +68,7 @@ object Application extends Controller {
     val sc = new SparkContext(conf)
 
    
-    val myRatings = loadRatings(args(1))
+    val myRatings = getRandomProduct
     val myRatingsRDD = sc.parallelize(myRatings, 1)
 
 
@@ -103,10 +106,20 @@ object Application extends Controller {
     }
   }
 */
+  def getRandomProduct(Retries: Int): Future[AllRatedProducts] = {  
+      
+      val ProductID = recommender.getRandomProductID.recoverWith  {
+      case e: Exception if Retries >= 0 =>
+        GetRandomProduct(Retries - 1)
+      }
+      ProductID
+    }
+    
   def index() = Action {
     Redirect("/rating")
   }
-
+ }
+   
   def recommendation = Action.async {
     ratingCollection.find(BSONDocument.empty).cursor[AmazonRating].collect[Seq]().flatMap {
       ratings =>
@@ -123,5 +136,4 @@ object Application extends Controller {
         }
     }
   }
-
 }

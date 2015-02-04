@@ -3,7 +3,7 @@ package model
 import play.api.libs.json.Json
 
 
-//case class AProduct(itemId: String, title: String, url: String, img: String, description: String)
+//case class Product(itemId: String, title: String, url: String, img: String, description: String)
 case class AllRatedProducts(userId: String, productId: String, rating: Double)
 
 //case class AmazonProductAndRating(product: AmazonProduct, rating: AmazonRating)

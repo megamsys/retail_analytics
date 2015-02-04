@@ -1,4 +1,4 @@
-package util
+/*package util
 
 import jodd.lagarto.dom.{NodeSelector, LagartoDOMBuilder}
 import model.AmazonProduct
@@ -29,3 +29,4 @@ object AmazonPageParser {
     }
   }
 }
+*/

@@ -12,11 +12,24 @@ import scala.util.Random
 
 class Recommender(@transient sc: SparkContext, ratings: String, products: String) extends Serializable {
  
+  
+  val productDict = new Dictionary(ratings.map(_.productId).distinct.collect)
+
+  
+  def getRandomProductID = {
+  randomProduct = productDict.getWord(random.nextInt(productDict.size))
+  if randomProduct.size < 1 {
+     throw new RuntimeException(s"Check your data please!")
+  }
+}
+  
+  
  val ratings_parse  = sc.textFile(ratings).map {
     line =>
       val Array(userId, productId, scoreStr) = line.split(",")
       AllRatedProducts(userId, productId, scoreStr.toDouble)
-  }
+ }
+
     val numRatings = ratings.count()
     val numUsers = ratings.map(_._2.user).distinct().count()
     val numProducts = ratings.map(_._2.product).distinct().count()
@@ -43,7 +56,7 @@ class Recommender(@transient sc: SparkContext, ratings: String, products: String
 
     println("Training: " + numTraining + ", validation: " + numValidation + ", test: " + numTest)
 
-    // train models and evaluate them on the validation set
+  
 
     val ranks = List(8, 12)
     val lambdas = List(0.1, 10.0)
@@ -83,6 +96,7 @@ class Recommender(@transient sc: SparkContext, ratings: String, products: String
 
     // clean up
     sc.stop()
+    
 //NEED TO CHANGE THE computeRmse() and get random product from dictionary and compare.
 
   /** Compute RMSE (Root Mean Squared Error). */
@@ -93,6 +107,7 @@ class Recommender(@transient sc: SparkContext, ratings: String, products: String
       .values
     math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
   }
+    
 /*
   /** Load ratings from file. */
   def loadRatings(path: String): Seq[Rating] = {
