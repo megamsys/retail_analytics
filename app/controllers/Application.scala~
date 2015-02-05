@@ -5,11 +5,17 @@ import java.io.File
 import scala.io.Source
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
+<<<<<<< HEAD
+=======
+import play.api.mvc._
+>>>>>>> origin/master
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
+import util.Recommender
+import model.AllRatedProducts._
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
@@ -19,6 +25,7 @@ import java.net.URLDecoder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 
 object Application extends Controller {  
    
