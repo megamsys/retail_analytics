@@ -1,6 +1,6 @@
-@(item: model.AmazonProduct)
+@(item: String)
 
-@main(item.title, "rating") {
+
     <div class="jumbotron">
         <h2 class="text-center">
             <span>Your rating:</span>
@@ -12,16 +12,4 @@
             or <a href="/rating">Skip</a>
         </h2>
     </div>
-    <h3>@item.title</h3>
-    <div class="row">
-        <div class="col-md-4">
-            <img src="@item.img"/>
-            <br/>
-            <a href="@item.url" target="_blank">See item on Amazon</a>
-        </div>
-        <div class="col-md-6">
-        @Html(item.description)
-        </div>
-    </div>
-
-}
+ 
