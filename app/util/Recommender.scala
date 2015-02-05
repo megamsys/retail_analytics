@@ -1,4 +1,4 @@
-package util
+/*package util
 
 import org.jblas.DoubleMatrix
 import org.apache.spark.rdd._
@@ -196,4 +196,5 @@ val ratings_new = ratings_parse.groupBy(_.prodId)
     result
   }
 }
+*/
 */
