@@ -19,7 +19,7 @@ import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationMo
 case class AllRatedProducts(sc: SparkContext, ratings: String) {
   
   
-  val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/retail5.csv").map { line =>
+ /* val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/retail5.csv").map { line =>
       val fields = line.split(",")
      //   line.split(",")
       (fields(5).toLong % 10, Rating(fields(0).toInt, fields(3).toInt, fields(4).toDouble))
@@ -97,7 +97,7 @@ case class AllRatedProducts(sc: SparkContext, ratings: String) {
       i += 1
     }
       
-
+*/
       
       
       
