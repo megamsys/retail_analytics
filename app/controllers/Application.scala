@@ -31,13 +31,13 @@ object Application extends Controller {
 
   def index() = Action {     
    // Redirect("/ratings")
-   val ratings = sc.textFile("hdfs://localhost:8097/ss/retail5.csv").map { line =>
+   val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/retail5.csv").map { line =>
       val fields = line.split(",")
      //   line.split(",")
       (fields(5).toLong % 10, Rating(fields(0).toInt, fields(3).toInt, fields(4).toDouble))
      
     }
-   // val ratings = sc.textFile("hdfs://localhost:8097/ss/retail1.csv")
+   // val ratings = sc.textFile("hdfs://19:8097/ss/retail1.csv")
    // val counts = ratings.flatMap(line => line.split(" "))
    //              .map(word => (word, 1))
    //              .reduceByKey(_ + _)
