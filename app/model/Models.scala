@@ -15,8 +15,7 @@ import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
 
 
-//case class Product(itemId: String, title: String, url: String, img: String, description: String)
-case class AllRatedProducts(sc: SparkContext, ratings: String) {
+case class AllRatedProducts(sc: SparkContext, ratings: RDD[(Long, Rating)]) {
   
   
  /* val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/retail5.csv").map { line =>
@@ -25,9 +24,19 @@ case class AllRatedProducts(sc: SparkContext, ratings: String) {
       (fields(5).toLong % 10, Rating(fields(0).toInt, fields(3).toInt, fields(4).toDouble))
      
     }
+  */
   
-  val testTuple = //enter a test data
-  val myRatingsRDD = sc.parallelize(testTuple, 1)
+  private def changeToRating(testTuple: String) = {
+    
+    val fields = testTuple.split(" ")
+   Rating(fields(0).toInt, fields(1).toInt, fields(2).toInt)  
+  }
+  
+  val testTuple = "3,22,4"
+  val tple = testTuple.split(",").map(_.trim)
+  val Tuple = tple.map(changeToRating)
+  
+  val myRatingsRDD = sc.parallelize(Tuple)
   
   val numRatings = ratings.count()    
   
@@ -81,25 +90,36 @@ case class AllRatedProducts(sc: SparkContext, ratings: String) {
         println(testRmse) //compare this with normal rmse equation, it is a lot better. 
          
       
-    val aptProductIds = myRatings.map(_.product).toSet
-    val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
+    val aptProductIds = Tuple.map(_.product).toSet
+   // val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
+    val candidates = sc.parallelize((aptProductIds).toSeq)
     val recommendations = bestModel.get
       .predict(candidates.map((0, _)))
       .collect()
-      .sortBy(- _.rating)
+       .sortBy(- _.rating)
       .take(50)
     
       //return the predictions
-      var i = 1
+    var i = 1
     println("Products matching the given products:")
     recommendations.foreach { r =>
-      println("%2d".format(i) + ": " + products(r.product))
+      println("%2d".format(i) + ": " + r.product)
       i += 1
     }
       
-*/
       
-      
+       sc.stop()
+       
+       
+/** Compute RMSE (Root Mean Squared Error). */
+def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long): Double = {
+val predictions: RDD[Rating] = model.predict(data.map(x => (x.user, x.product)))
+val predictionsAndRatings = predictions.map(x => ((x.user, x.product), x.rating))
+.join(data.map(x => ((x.user, x.product), x.rating)))
+.values
+math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
+}
+
       
 }
 

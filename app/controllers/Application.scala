@@ -12,7 +12,7 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ ALS, Rating, MatrixFactorizationModel }
 //import util.Recommender
-import model.AllRatedProducts._
+import model.AllRatedProducts
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
@@ -59,13 +59,14 @@ object Application extends Controller {
 
   def ratings() = Action { request =>
     //  val ratings_initial = sc.textFile("hdfs://localhost:8097/analytics/us3.csv").map { line =>
-    val ratings = sc.textFile("hdfs://localhost:8097/ss/retail1.csv").map { line =>
-      //  val fields = line.split(",")
-      line.split(",")
-      // (fields(6).toLong % 10, Rating(fields(1).toInt, fields(4).toInt, fields(5).toDouble))
+    val ratings = sc.textFile("retail.csv").map { line =>
+        val fields = line.split(",")
+      //line.split(",")
+       (fields(6).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toInt))
 
     }
-
+    
+    val recommend = new AllRatedProducts(sc, ratings)
     val numRatings = ratings.count()
 
     println("Got " + numRatings)
