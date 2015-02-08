@@ -1,3 +1,4 @@
+
 val appName = "MeglyticsVisualizer"
 
 val appVersion = "1.0-SNAPSHOT"
