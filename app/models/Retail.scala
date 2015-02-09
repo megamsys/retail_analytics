@@ -1,32 +1,39 @@
-package model
+package models
 
 import play.api.libs.json.Json
 import java.io.File
-
 import scala.io.Source
-
+import com.typesafe.config._
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
-
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd._
-import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
+import org.apache.spark.mllib.recommendation.{ ALS, Rating, MatrixFactorizationModel }
+import models.config._
 
+case class RecommendProduct(productName: String, nooforders: Int) {
+  val json = "{\"productName\":\"" + productName + "\",\"nooforders\":" + nooforders + "}"
+}
+//case class AllRatedProducts(rating: String) {
 
-//case class Product(itemId: String, title: String, url: String, img: String, description: String)
-case class AllRatedProducts(sc: SparkContext, rating: String) {
-  
-  
- /* val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/retail5.csv").map { line =>
+object Retail {
+
+  val sc = new SparkContext(MConfig.sparkurl, "recommender")
+  sc.addJar("target/scala-2.10/meglyticsvisualizer_2.10-1.0-SNAPSHOT.jar")
+
+  // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
+  def buyingbehaviour(product_name: String, filename: String) = {
+    val ratings = sc.textFile(MConfig.sparkurl + filename).map { line =>
       val fields = line.split(",")
-     //   line.split(",")
+      //   line.split(",")
       (fields(5).toLong % 10, Rating(fields(0).toInt, fields(3).toInt, fields(4).toDouble))
-     
+
     }
-  
-  val testTuple = "TV" //enter a test data
+    println("ratings==========================> " + ratings)
+
+    /* val testTuple = "TV" //enter a test data
   val myRatingsRDD = sc.parallelize(testTuple, 1)
   
   val numRatings = ratings.count()    
@@ -95,11 +102,19 @@ case class AllRatedProducts(sc: SparkContext, rating: String) {
     recommendations.foreach { r =>
       println("%2d".format(i) + ": " + products(r.product))
       i += 1
-    }
-      
-*/
-      
-      
-      
+    }      
+   */
+  }
+  
+  
+  def customersegmentation(product_name: String, filename: String) = {
+    
+    
+  }
+  
+  def profitability(product_name: String, filename: String) = {
+    
+  }
+
 }
 

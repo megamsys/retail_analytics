@@ -1,16 +1,27 @@
 @(message: String)
 
-<div class="jumbotron">
-	<h2 class="text-center">
-	<form id="upload" class="form-vertical" action="index.html">
-		<p>
-			File Upload
-		</p>			
-		
+<div class="jumbotron row">
+	<div class="col-lg-6">
+		<h2 class="text-center">
+		<form id="upload" class="form-vertical" action="upload">
+			<p>
+				File Upload
+			</p>
 			<input type="submit" class="btn btn-block btn-primary btn-default" value="Upload" />
-		</div>		
-	</form></h2>
+
+		</form></h2>
+	</div>
+	<div class="col-lg-6">
+		<h2 class="text-center">
+		<form id="analysis" class="form-vertical" action="analysis">
+			<p>
+				Start Analytics
+			</p>
+			<input type="submit" class="btn btn-block btn-primary btn-default" value="Analysis" />
+		</form></h2>
+	</div>
 </div>
-
-
+<div class="row">
+	<div id="pieChart" class="chart-holder"></div>
+</div>
 
