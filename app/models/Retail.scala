@@ -13,8 +13,12 @@ import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ ALS, Rating, MatrixFactorizationModel }
 import models.config._
 
-case class RecommendProduct(productName: String, nooforders: Int) {
-  val json = "{\"productName\":\"" + productName + "\",\"nooforders\":" + nooforders + "}"
+import scala.collection.mutable.ListBuffer
+
+
+
+case class RecommendProduct(productId: Int, nooforders: Double) {
+  val json = "{\"productId\":\"" + productId + "\",\"nooforders\":" + nooforders + "}"
 }
 //case class AllRatedProducts(rating: String) {
 
@@ -24,7 +28,7 @@ object Retail {
   sc.addJar("target/scala-2.10/meglyticsvisualizer_2.10-1.0-SNAPSHOT.jar")
 
   // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
-  def buyingbehaviour(product_name: String, filename: String) = {
+  def buyingbehaviour(product_name: String, filename: String): List[String] = {
     val ratings = sc.textFile(MConfig.sparkurl + filename).map { line =>
       val fields = line.split(",")
       //   line.split(",")
@@ -33,9 +37,18 @@ object Retail {
     }
     println("ratings==========================> " + ratings)
 
-    /* val testTuple = "TV" //enter a test data
-  val myRatingsRDD = sc.parallelize(testTuple, 1)
+  def changeToRating(testTuple: String) = {
   
+   val fields = testTuple.split(" ")
+   Rating(fields(0).toInt, fields(1).toInt, fields(2).toInt) 
+    }
+
+ val testTuple = "3,22,4" //take a simple value
+ val tple = testTuple.split(",").map(_.trim)
+ val Tuple = tple.map(changeToRating)
+
+ val myRatingsRDD = sc.parallelize(Tuple)
+
   val numRatings = ratings.count()    
   
     val numPartitions = 4
@@ -88,24 +101,33 @@ object Retail {
         println(testRmse) //compare this with normal rmse equation, it is a lot better. 
          
       
-    val aptProductIds = myRatings.map(_.product).toSet
-    val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
+    val aptProductIds = Tuple.map(_.product).toSet
+    //val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
+    val candidates = sc.parallelize((aptProductIds).toSeq)
     val recommendations = bestModel.get
       .predict(candidates.map((0, _)))
       .collect()
       .sortBy(- _.rating)
       .take(50)
     
-      //return the predictions
-      var i = 1
+      
+         //return the predictions
+   
     println("Products matching the given products:")
-    recommendations.foreach { r =>
-      println("%2d".format(i) + ": " + products(r.product))
-      i += 1
-    }      
-   */
+    
+      val finalList = ListBuffer[String]()
+      recommendations.foreach { r =>
+       val ProductName = r.product
+       val nooforders = r.rating
+        val finalJson = new RecommendProduct(ProductName, nooforders).json  
+       finalList +=  finalJson
+        }
+     
+ sc.stop()  
+      finalList.toList
   }
-  
+             
+      
   
   def customersegmentation(product_name: String, filename: String) = {
     
@@ -116,5 +138,16 @@ object Retail {
     
   }
 
-}
+  /** Compute RMSE (Root Mean Squared Error). */
+def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long): Double = {
+val predictions: RDD[Rating] = model.predict(data.map(x => (x.user, x.product)))
+val predictionsAndRatings = predictions.map(x => ((x.user, x.product), x.rating))
+.join(data.map(x => ((x.user, x.product), x.rating)))
+.values
+math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
+ }
+  
+ }
+
+
 
