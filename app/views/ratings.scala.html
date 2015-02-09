@@ -1,27 +1,5 @@
 @(message: String)
-
-<div class="jumbotron row">
-	<div class="col-lg-6">
-		<h2 class="text-center">
-		<form id="upload" class="form-vertical" action="upload">
-			<p>
-				File Upload
-			</p>
-			<input type="submit" class="btn btn-block btn-primary btn-default" value="Upload" />
-
-		</form></h2>
-	</div>
-	<div class="col-lg-6">
-		<h2 class="text-center">
-		<form id="analysis" class="form-vertical" action="analysis">
-			<p>
-				Start Analytics
-			</p>
-			<input type="submit" class="btn btn-block btn-primary btn-default" value="Analysis" />
-		</form></h2>
-	</div>
-</div>
-<div class="row">
-	<div id="pieChart" class="chart-holder"></div>
-</div>
-
+@main("Meglytics") {
+@form(message)
+@chart(message)
+}
