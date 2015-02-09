@@ -16,7 +16,7 @@ import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationMo
 
 
 //case class Product(itemId: String, title: String, url: String, img: String, description: String)
-case class AllRatedProducts(sc: SparkContext, ratings: String) {
+case class AllRatedProducts(sc: SparkContext, rating: String) {
   
   
   val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/retail5.csv").map { line =>
@@ -26,7 +26,7 @@ case class AllRatedProducts(sc: SparkContext, ratings: String) {
      
     }
   
-  val testTuple = //enter a test data
+  val testTuple = "TV" //enter a test data
   val myRatingsRDD = sc.parallelize(testTuple, 1)
   
   val numRatings = ratings.count()    
