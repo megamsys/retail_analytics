@@ -1,4 +1,4 @@
-@(title: String, tab: String)(content: Html)
+@(title: String)(content: Html)
 
 <!DOCTYPE html>
 
@@ -18,25 +18,16 @@
         <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="/">Megam recommender</a>
+                    <a class="navbar-brand" href="/">Megam Retail Analytics</a>
                 </div>
                 <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="@("active".when(tab == "rating"))"><a href="/">Ratings</a></li>
-                        <li class="@("active".when(tab == "recommendation"))"><a href="/recommendation">Recommendations</a></li>
-                        <li><a href="//localhost:4040" target="_blank">Spark Dash</a></li>
-                    </ul>
+                    
                 </div> <!--/.nav-collapse -->
             </div>
         </div> <!-- /container -->
         <div class="container theme-showcase" role="main">
         @content
-        </div>
-        <footer class="footer">
-            <div class="container">
-                <p>Designed and built with love somewhere on Earth</p>
-            </div>
-        </footer>
+        </div>        
     </body>
     
     
@@ -54,20 +45,5 @@
 		<script src="http://code.highcharts.com/highcharts.js"></script>
 		<script src="http://code.highcharts.com/modules/exporting.js"></script>
 		
-		@if(Messages("subheader.time_line") == title) {
-			<script src="@routes.Assets.at("js/timeAndLineChartHandler.js")" type="text/javascript"></script>
-		}
-
-		@if(Messages("subheader.bar_column") == title) {
-			<script src="@routes.Assets.at("js/barAndColumnChartHandler.js")" type="text/javascript"></script>
-		}
-		
-		@if(Messages("products.flatten") == title){
-			<script src="@routes.Assets.at("js/pieAndAreaChartHandler.js")" type="text/javascript"></script>
-		}
-		
-		@if(Messages("subheader.bubble") == title){
-			<script src="http://code.highcharts.com/highcharts-more.js"></script>
-			<script src="@routes.Assets.at("js/bubbleChartHandler.js")" type="text/javascript"></script>
-		}
+	
 </html>
