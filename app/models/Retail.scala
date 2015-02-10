@@ -62,8 +62,9 @@ object Retail {
 
     }.collect().toMap
     println("ratings==========================> " + ratings)    
-
-    val testTuple = "3459 9850 5" //take a simple value
+    
+   val prodId = product_id
+    val testTuple = "3344" + prodId + "5" //
     val tple = testTuple.split(",")
     println("---------------------==========="+ tple)
     val Tuple = tple.map(changeToRating)     
