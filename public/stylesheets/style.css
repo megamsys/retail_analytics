@@ -1,3 +1,8 @@
 .header {
   background-color: #F5F5F5 !important;
 }
+
+.img-res {
+  height: 35px !important;
+  width: 50% !important;
+}
