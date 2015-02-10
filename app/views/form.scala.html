@@ -1,15 +1,36 @@
-@(message: String)
+@(message: String)(implicit flash:
+play.api.mvc.Flash)
 
 <div class="jumbotron row">
 	<div class="col-lg-6">
 		<h2 class="text-center">
-		<form id="upload" class="form-vertical" action="upload">
-			<p>
-				File Upload
-			</p>
-			<input type="submit" class="btn btn-block btn-primary btn-default" value="Upload" />
-
-		</form></h2>
+		<p>
+			Upload file
+		</p></h2>
+		@helper.form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
+		<div class="col-lg-12">
+			<div class="col-lg-6">
+				<input type="file" name="picture">
+			</div>
+			<div class="col-lg-6">
+				<input type="submit" class="btn btn-block btn-primary btn-default">
+			</div>
+		</div>
+		}
+		@flash.get("success").map { suc=>
+		<div class="alert alert-success">
+			@for(sm <- flash.data) {
+			<h3>@sm._2</h3>
+			}
+		</div>
+		}
+		@flash.get("error").map { err=>
+		<div class="alert alert-warning">
+			@for(sm <- flash.data) {
+			<h3>@sm._2</h3>
+			}
+		</div>
+		}
 	</div>
 	<div class="col-lg-6">
 		<h2 class="text-center">
@@ -21,5 +42,4 @@
 		</form></h2>
 	</div>
 </div>
-
 

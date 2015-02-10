@@ -15,6 +15,11 @@
 */
 package models
 
+import scalaz._
+import Scalaz._
+import scalaz.EitherT._
+import scalaz.Validation
+import scalaz.NonEmptyList._
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -32,19 +37,24 @@ object HDFSFileService {
 
   private val fileSystem = FileSystem.get(conf)
 
-  def saveFile(filepath: String): Unit = {
-    val file = new File(filepath)
-    val out = fileSystem.create(new Path(file.getName))
-    val in = new BufferedInputStream(new FileInputStream(file))
-    var b = new Array[Byte](1024)
-    var numBytes = in.read(b)
-    while (numBytes > 0) {
-      out.write(b, 0, numBytes)
-      numBytes = in.read(b)
-    }
-    in.close()
-    out.close()
+  def saveFile(filepath: String): ValidationNel[Throwable, String] = {
+    (Validation.fromTryCatch[String] {
+      val file = new File(filepath)
+      val out = fileSystem.create(new Path(file.getName))
+      val in = new BufferedInputStream(new FileInputStream(file))
+      var b = new Array[Byte](1024)
+      var numBytes = in.read(b)
+      while (numBytes > 0) {
+        out.write(b, 0, numBytes)
+        numBytes = in.read(b)
+      }
+      in.close()
+      out.close()
+      "File Uploaded"
+    } leftMap { t: Throwable => nels(t) })
+
   }
+ 
 
   def removeFile(filename: String): Boolean = {
     val path = new Path(filename)

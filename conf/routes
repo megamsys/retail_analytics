@@ -5,7 +5,7 @@
 # Home page
 
 GET        /                     controllers.Application.index
-GET       /upload               controllers.Application.upload
+POST       /upload               controllers.Application.upload
 GET        /analysis             controllers.Application.analysis
 #GET        /recommendation      controllers.Application.recommendation
 
