@@ -1,4 +1,4 @@
-@(message: String)
+@(message: String)(implicit flash: play.api.mvc.Flash)
 @main("Meglytics") {
 @form(message)
 @chart(message)

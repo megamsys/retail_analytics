@@ -15,26 +15,50 @@
 */
 package controllers
 
+import scalaz._
+import Scalaz._
+import scalaz.EitherT._
+import scalaz.Validation
+//import scalaz.Validation.FlatMap._
+import scalaz.NonEmptyList._
 import play.api.mvc._
 import java.io.File
 import scala.io.Source
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
-
 import models._
 
-object Application extends Controller {  
-  
-  def index() = Action {
+object Application extends Controller {
+
+  def index() = Action { implicit request =>
     Ok(views.html.index("Megam Analytics."))
   }
-  
-  def upload() = Action {
-    models.HDFSFileService.saveFile("/home/rajthilak/Documents/csv/Clothing.csv")
-    Ok(views.html.ratings("hello"))
+
+  def upload = Action(parse.multipartFormData) { implicit request =>
+
+    request.body.file("picture").map { picture =>
+      import java.io.File
+      val filename = picture.filename
+      val contentType = picture.contentType
+      picture.ref.moveTo(new File("/tmp/"+filename))
+
+      models.HDFSFileService.saveFile("/tmp/"+filename) match {
+        case Success(succ) => {
+          val fu = List(("success" -> succ))
+          Redirect("/").flashing(fu: _*)
+        }
+        case Failure(err) => {
+          val fu = List(("error" -> "File doesn't uploaded"))
+          Redirect("/").flashing(fu: _*)
+        }
+      }
+    }.getOrElse {
+      val fu = List(("error" -> "File doesn't uploaded"))
+      Redirect("/").flashing(fu: _*)
+    }
   }
-  
-  def analysis() = Action {
+
+  def analysis() = Action { implicit request =>
     models.Retail.buyingbehaviour("TV", "retail5.csv")
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
