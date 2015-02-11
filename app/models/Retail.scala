@@ -41,26 +41,35 @@ object Retail {
   sc.addJar("target/scala-2.10/meglyticsvisualizer_2.10-1.0-SNAPSHOT.jar")
 
   def changeToRating(testTuple: String) = {
-      println("==============================="+ testTuple)
+      println("========================s======="+ testTuple)
       val fields = testTuple.split(" ")
-      Rating(fields(0).toInt, fields(1).toInt, fields(2).toInt)
+      Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble)
     }
   
   // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
-  def buyingbehaviour(product_name: String, filename: String): List[String] = {
-    val ratings = sc.textFile(MConfig.sparkurl + filename).map { line =>
+  def buyingbehaviour(product_id: String, filename: String): List[String] = {
+    val ratings = sc.textFile("hdfs://192.168.1.5:8097/analytics/" + filename).map { line =>
       val fields = line.split(",")
       //   line.split(",")
-      (fields(5).toLong % 10, Rating(fields(0).toInt, fields(3).toInt, fields(4).toDouble))
+       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
 
     }
-    println("ratings==========================> " + ratings)    
+    
+    val products = sc.textFile("hdfs://192.168.1.5:8097/analytics/products.csv").map { line =>
+      val fields = line.split(",")
+      //   line.split(",")
+      (fields(0).toInt, fields(1))
 
-    val testTuple = "3459,9850,5" //take a simple value
-    val tple = testTuple.split(",").map(_.trim)
+    }.collect().toMap
+    println("ratings==========================> " + ratings)    
+    
+   val prodId = product_id
+    val testTuple = "3344" + prodId + "5" //
+    val tple = testTuple.split(",")
     println("---------------------==========="+ tple)
     val Tuple = tple.map(changeToRating)     
 
+    
     val myRatingsRDD = sc.parallelize(Tuple)
 
     val numRatings = ratings.count()
@@ -113,8 +122,8 @@ object Retail {
     println(testRmse) //compare this with normal rmse equation, it is a lot better. 
 
     val aptProductIds = Tuple.map(_.product).toSet
-    //val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
-    val candidates = sc.parallelize((aptProductIds).toSeq)
+    val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
+    //val candidates = sc.parallelize((aptProductIds).toSeq)
     val recommendations = bestModel.get
       .predict(candidates.map((0, _)))
       .collect()
@@ -129,6 +138,8 @@ object Retail {
     recommendations.foreach { r =>
       val ProductName = r.product
       val nooforders = r.rating
+      println(ProductName)
+      println("GOt-IT----------------")
       val finalJson = new RecommendProduct(ProductName, nooforders).json
       finalList += finalJson
     }

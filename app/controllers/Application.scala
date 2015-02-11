@@ -59,7 +59,7 @@ object Application extends Controller {
   }
 
   def analysis() = Action { implicit request =>
-    models.Retail.buyingbehaviour("TV", "retail5.csv")
+    models.Retail.buyingbehaviour("11", "retail5.csv")
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
         
@@ -68,7 +68,7 @@ object Application extends Controller {
               val rn: FunnelResponse = new HttpReturningError(err)
               Status(rn.code)(rn.toJson(true))
             }  
-    } */
+    }*/ 
     Ok(views.html.ratings("hello"))
   }
 
