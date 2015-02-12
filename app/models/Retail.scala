@@ -40,37 +40,48 @@ object Retail {
   val sc = new SparkContext(MConfig.sparkurl, "recommender")
   sc.addJar("target/scala-2.10/meglyticsvisualizer_2.10-1.0-SNAPSHOT.jar")
 
-  def changeToRating(testTuple: String) = {
-      println("========================s======="+ testTuple)
-      val fields = testTuple.split(" ")
-      Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble)
-    }
+  def changeToRating(Suser: Int, prodId: Int, MaxR: Double): Rating = {
+      println("==============================="+ Suser + prodId + MaxR)
+      
+     /*  var i = 1   
+       val arrInside = Array[Double](3)
+       
+      val arr = Array(Suser, prodId, MaxR)
+      val result = arr.foreach { l => 
+       
+        arrInside(i) = l
+        i = i + 1
+       Rating(arrInside(1).toInt, arrInside(2).toInt, arrInside(3).toDouble)
+      } */
+     val rat = Rating(Suser.toInt, prodId.toInt, MaxR.toDouble)
+     println(rat)
+      rat
+      //result.toSeq
+      }
   
   // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
-  def buyingbehaviour(product_id: String, filename: String): List[String] = {
-    val ratings = sc.textFile("hdfs://192.168.1.5:8097/analytics/" + filename).map { line =>
+  def buyingbehaviour(product_id: Int, filename: String): List[String] = {
+    val ratings = sc.textFile("hdfs://192.168.1.9:8097/ss/" + filename).map { line =>
       val fields = line.split(",")
       //   line.split(",")
        (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
 
     }
     
-    val products = sc.textFile("hdfs://192.168.1.5:8097/analytics/products.csv").map { line =>
+    val products = sc.textFile("hdfs://192.168.1.9:8097/ss/products.csv").map { line =>
       val fields = line.split(",")
       //   line.split(",")
       (fields(0).toInt, fields(1))
 
     }.collect().toMap
     println("ratings==========================> " + ratings)    
-    
+    val Suser = 3344
    val prodId = product_id
-    val testTuple = "3344" + prodId + "5" //
-    val tple = testTuple.split(",")
-    println("---------------------==========="+ tple)
-    val Tuple = tple.map(changeToRating)     
+   val MaxR = 5
+    val Tuple = changeToRating(Suser, prodId, MaxR)     
 
     
-    val myRatingsRDD = sc.parallelize(Tuple)
+    val myRatingsRDD = sc.parallelize(Seq(Tuple))
 
     val numRatings = ratings.count()
 
@@ -121,7 +132,7 @@ object Retail {
     val testRmse = computeRmse(bestModel.get, test, numTest) //just a simple test, 
     println(testRmse) //compare this with normal rmse equation, it is a lot better. 
 
-    val aptProductIds = Tuple.map(_.product).toSet
+    val aptProductIds = Seq(Tuple).map(_.product).toSet
     val candidates = sc.parallelize(products.keys.filter(!aptProductIds.contains(_)).toSeq)
     //val candidates = sc.parallelize((aptProductIds).toSeq)
     val recommendations = bestModel.get
