@@ -35,13 +35,12 @@ object Application extends Controller {
   }
 
   def upload = Action(parse.multipartFormData) { implicit request =>
-
-    request.body.file("picture").map { picture =>
-      import java.io.File
+       request.body.file("picture").map { picture =>
+       import java.io.File
       val filename = picture.filename
       val contentType = picture.contentType
       picture.ref.moveTo(new File("/tmp/"+filename))
-
+     
       models.HDFSFileService.saveFile("/tmp/"+filename) match {
         case Success(succ) => {
           val fu = List(("success" -> succ))
@@ -59,9 +58,8 @@ object Application extends Controller {
   }
 
   def analysis() = Action { implicit request =>
-  //  models.Retail.buyingbehaviour(56669, "retail5.csv")
-   val test = models.AllRatedProducts()
-    test.buyingbehaviour(56669, "retail5.csv")
+  models.Retail.buyingbehaviour(11, "ratings.dat")
+  
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
         
