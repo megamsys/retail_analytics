@@ -39,8 +39,11 @@ object HDFSFileService {
 
   def saveFile(filepath: String): ValidationNel[Throwable, String] = {
     (Validation.fromTryCatch[String] {
+      
       val file = new File(filepath)
       val out = fileSystem.create(new Path(file.getName))
+      
+      
       val in = new BufferedInputStream(new FileInputStream(file))
       var b = new Array[Byte](1024)
       var numBytes = in.read(b)
@@ -48,6 +51,7 @@ object HDFSFileService {
         out.write(b, 0, numBytes)
         numBytes = in.read(b)
       }
+      
       in.close()
       out.close()
       "File Uploaded"
