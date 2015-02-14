@@ -58,7 +58,7 @@ object Application extends Controller {
   }
 
   def analysis() = Action { implicit request =>
-  models.Retail.buyingbehaviour(11, "ratings.dat")
+  models.Retail.buyingbehaviour(11, "retailnew1.csv")
   
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
