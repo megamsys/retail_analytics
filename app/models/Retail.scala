@@ -49,13 +49,13 @@ object Retail {
   def buyingbehaviour(product_id: Int, filename: String): List[String] = {
 
     println("Talking to hadoop, hold thy...")
-    val rawData = sc.textFile("hdfs://192.168.1.9:8097/user/megamwork/" + filename)
+    val rawData = sc.textFile("hdfs://192.168.1.9:8097/user/rajthilak/" + filename)
     val ratings = rawData.map(_.split(',') match {
       case Array(user, item, rate) =>
         Rating(user.toInt, item.toInt, rate.toDouble)
     })
 
-    val products = sc.textFile("hdfs://192.168.1.9:8097/user/megamwork/productsnew1.csv").map { line =>
+    val products = sc.textFile("hdfs://192.168.1.9:8097/user/rajthilak/products.csv").map { line =>
       val fields = line.split(',')
       (fields(0).toInt, fields(1))
     }.collect().toMap
