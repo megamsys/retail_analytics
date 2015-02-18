@@ -28,6 +28,8 @@ import org.apache.log4j.Logger
 import org.apache.log4j.Level
 import models._
 
+import play.api.libs.json._
+
 object Application extends Controller {
 
   def index() = Action { implicit request =>
@@ -47,18 +49,18 @@ object Application extends Controller {
           Redirect("/").flashing(fu: _*)
         }
         case Failure(err) => {
-          val fu = List(("error" -> "File doesn't uploaded"))
+          val fu = List(("error" -> "File doesn't get uploaded"))
           Redirect("/").flashing(fu: _*)
         }
       }
     }.getOrElse {
-      val fu = List(("error" -> "File doesn't uploaded"))
+      val fu = List(("error" -> "File doesn't get uploaded.."))
       Redirect("/").flashing(fu: _*)
     }
   }
 
   def analysis() = Action { implicit request =>
-  models.Retail.buyingbehaviour(11, "retailnew1.csv")
+  val productList = models.Retail.buyingbehaviour(11, "retailnew1.csv")
   
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
@@ -69,7 +71,16 @@ object Application extends Controller {
               Status(rn.code)(rn.toJson(true))
             }  
     }*/ 
-    Ok(views.html.ratings("hello"))
+  println("BACK==========================>>>")
+  println(productList)
+ 
+  
+  val finalJson = {
+    for {
+      product <- productList
+    } yield Json.parse(product).as[JsObject]
+  }
+    Ok(views.html.finalProducts(finalJson))
   }
 
 }
