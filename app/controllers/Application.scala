@@ -60,7 +60,7 @@ object Application extends Controller {
   }
 
   def analysis() = Action { implicit request =>
-  val productList = models.Retail.buyingbehaviour(11, "retailnew1.csv")
+  val productList = models.Retail.buyingbehaviour(11, "retail7.csv")
   
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
@@ -75,12 +75,12 @@ object Application extends Controller {
   println(productList)
  
   
-  val finalJson = {
-    for {
-      product <- productList
-    } yield Json.parse(product).as[JsObject]
-  }
-    Ok(views.html.finalProducts(finalJson))
+  //val finalJson = {
+  //  for {
+  //    product <- productList
+  //  } yield Json.parse(product).as[JsObject]
+ // }
+    Ok(views.html.finalProducts(productList))
   }
 
 }
