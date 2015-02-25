@@ -20,5 +20,8 @@ object MConfig {
 
   val sparkurl = play.api.Play.application(play.api.Play.current).configuration.getString("spark.url").get
   val hdfsuri = play.api.Play.application(play.api.Play.current).configuration.getString("hdfs.url").get
- 
+  val retailfile = play.api.Play.application(play.api.Play.current).configuration.getString("retailfile").get
+  val productsfile = play.api.Play.application(play.api.Play.current).configuration.getString("productsfile").get
+  val username = play.api.Play.application(play.api.Play.current).configuration.getString("username").get
+  val recommand_ID = play.api.Play.application(play.api.Play.current).configuration.getString("product_id").get
 }

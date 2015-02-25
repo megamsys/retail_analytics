@@ -15,7 +15,16 @@
 */
 package models
 
-import play.api.libs.json.Json
+import scalaz._
+import Scalaz._
+//import scalaz.effect.IO
+import scalaz.EitherT._
+import scalaz.Validation
+//import scalaz.Validation.FlatMap._
+import scalaz.NonEmptyList._
+import net.liftweb.json._
+import net.liftweb.json.scalaz.JsonScalaz._
+//import play.api.libs.json.Json
 import java.io.File
 import scala.io.Source
 import com.typesafe.config._
@@ -27,12 +36,45 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ ALS, Rating, MatrixFactorizationModel }
 import models.stack._
+import java.nio.charset.Charset
 
 import scala.collection.mutable.ListBuffer
 
-case class RecommendProduct(productId: String, nooforders: Double) {
+case class RetailRecommand(productId: String, nooforders: String) {
   val json = "{\"productId\":\"" + productId + "\",\"nooforders\":" + nooforders + "}"
+  
+  def toJValue: JValue = {
+    import net.liftweb.json.scalaz.JsonScalaz.toJSON
+    import models.json.RetailRecommandSerialization.{ writer => RetailRecommandWriter }
+    toJSON(this)(RetailRecommandWriter)
+  }
+
+  def toJson(prettyPrint: Boolean = false): String = if (prettyPrint) {
+    pretty(render(toJValue))
+  } else {
+    compactRender(toJValue)
+  }
+  
 }
+
+object RetailRecommand {
+  def empty: RetailRecommand = new RetailRecommand(new String(), new String())
+
+  def fromJValue(jValue: JValue)(implicit charset: Charset = Charset.forName("UTF-8")): Result[RetailRecommand] = {
+    import net.liftweb.json.scalaz.JsonScalaz.fromJSON
+    import models.json.RetailRecommandSerialization.{ reader => RetailRecommandReader }
+    fromJSON(jValue)(RetailRecommandReader)
+  }
+
+ /* def fromJson(json: String): Result[RetailRecommand] = (Validation.fromTryCatch[net.liftweb.json.JValue] {
+    play.api.Logger.debug(("%-20s -->[%s]").format("---json------------------->", json))
+    parse(json)
+  } leftMap { t: Throwable =>
+    UncategorizedError(t.getClass.getCanonicalName, t.getMessage, List())
+  }).toValidationNel.flatMap { j: JValue => fromJValue(j) }
+*/
+}
+
 //case class AllRatedProducts() {
 
 object Retail {
@@ -46,20 +88,37 @@ object Retail {
 
   // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
 
-  def buyingbehaviour(product_id: Int, filename: String): List[String] = {
+  def buyingbehaviour(product_id: Int, filename: String): Tuple2[RetailRecommands, String] = {
 
     println("Talking to hadoop, hold thy...")
-    val rawData = sc.textFile("hdfs://192.168.1.9:8097/user/rajthilak/" + filename)
+    
+    var productname = ""
+    
+    val rawData = sc.textFile(MConfig.hdfsuri+"user/" + MConfig.username + "/" + filename)
     val ratings = rawData.map(_.split(',') match {
       case Array(user, item, rate) =>
         Rating(user.toInt, item.toInt, rate.toDouble)
     })
 
-    val products = sc.textFile("hdfs://192.168.1.9:8097/user/rajthilak/products.csv").map { line =>
-      val fields = line.split(',')
+    val products = sc.textFile(MConfig.hdfsuri+"user/" + MConfig.username + "/" + MConfig.productsfile).map { line =>
+      val fields = line.split(',')     
       (fields(0).toInt, fields(1))
     }.collect().toMap
-
+    
+    /* sc.textFile(MConfig.hdfsuri+"user/" + MConfig.username + "/" + MConfig.productsfile).foreach { line =>
+      val fields = line.split(',')
+      println("--------------------------")
+      println(fields(0).toInt)
+      println(product_id)
+      println("--------------------------")
+      if(fields(0).toInt == product_id) {
+        productname = fields(1)
+        println("++++++++++++++++++++++++++++++++++++")
+        println(productname)
+      }     
+    }*/
+    
+    productname = products(product_id)   
     val userId = 1
     val prodId = product_id
     val maxRating = 5
@@ -110,21 +169,30 @@ object Retail {
 
     var i = 1
     val finalList = ListBuffer[String]()
+    val finalList1 = ListBuffer[RetailRecommand]()
     predRating.collect().sortBy(-_.rating).take(5).foreach { r =>
-      println("%2d".format(i) + ": " + products(r.product))
+    //  println("%2d".format(i) + ": " + products(r.product))
       val productId = r.product
-      val nooforders = r.rating
+      val nooforders = "%.1f".format(r.rating)     
       val ProductName = products(productId)
-      val finalJson = new RecommendProduct(ProductName, nooforders).json
+      val finalJson = new RetailRecommand(ProductName, nooforders).json
+      val finalJson1 = new RetailRecommand(ProductName, nooforders)
       finalList += finalJson
+      finalList1 += finalJson1
       i += 1
-    }
-
-    println(finalList.toList)
-    sc.stop()
-
-    finalList.toList
+    } 
+    
+    val rc = RetailRecommands(finalList1.toList) 
+    //sc.stop()   
+    Tuple2(rc, productname)  
   }
+  
+  def toJValue(nres: RetailRecommands): JValue = {
+
+      import net.liftweb.json.scalaz.JsonScalaz.toJSON
+      import models.json.RetailRecommandsSerialization.{ writer => RetailRecommandsWriter }
+      toJSON(nres)(RetailRecommandsWriter)
+    }
 
   def customersegmentation(product_name: String, filename: String) = {
 
