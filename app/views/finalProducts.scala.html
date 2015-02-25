@@ -1,4 +1,5 @@
-@(message: List[String])(implicit flash: play.api.mvc.Flash)
+@(message: RetailRecommands, productname: String)(implicit flash: play.api.mvc.Flash)
 @main("Meglytics") {
-@chart(message)
+@form("Meglytics")
+@chart(message, productname)
 }

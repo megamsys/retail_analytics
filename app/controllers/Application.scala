@@ -27,6 +27,7 @@ import scala.io.Source
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 import models._
+import models.stack._
 
 import play.api.libs.json._
 
@@ -60,7 +61,7 @@ object Application extends Controller {
   }
 
   def analysis() = Action { implicit request =>
-  val productList = models.Retail.buyingbehaviour(11, "retail7.csv")
+  val tuple_res = models.Retail.buyingbehaviour(MConfig.recommand_ID.toInt, MConfig.retailfile)
   
     /*models.Retail.buyingbehaviour("TV", "retail5.csv") match {
       case Success(succ) => {
@@ -72,7 +73,7 @@ object Application extends Controller {
             }  
     }*/ 
   println("BACK==========================>>>")
-  println(productList)
+  println(tuple_res._1)
  
   
   //val finalJson = {
@@ -80,7 +81,7 @@ object Application extends Controller {
   //    product <- productList
   //  } yield Json.parse(product).as[JsObject]
  // }
-    Ok(views.html.finalProducts(productList))
+    Ok(views.html.finalProducts(tuple_res._1, tuple_res._2))
   }
 
 }

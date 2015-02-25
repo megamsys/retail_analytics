@@ -22,7 +22,8 @@ val appDependencies = Seq(
   // Akka
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,  
-  "org.scalaz" %% "scalaz-core" % "7.1.1"
+  "org.scalaz" %% "scalaz-core" % "7.1.1",
+  "com.stackmob" %% "newman" % "1.3.5"
 )
 
 val root = Project(appName, file(".")).enablePlugins(play.PlayScala).settings(
