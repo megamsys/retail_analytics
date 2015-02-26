@@ -78,18 +78,26 @@ object RetailRecommand {
 //case class AllRatedProducts() {
 
 object Retail {
-  println("Now creating a spark instance--------------")
+ // println("Now creating a spark instance--------------")
+ // val conf = new SparkConf().setMaster(MConfig.sparkurl).setAppName("Meglytics Viz")
+
+ // val sc = new SparkContext(conf)
+ // sc.addJar("target/scala-2.10/meglyticsvisualizer_2.10-1.0-SNAPSHOT.jar")
+
+ // println("DONE---")
+
+  // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
+
+  def buyingbehaviour(product_id: Int, filename: String): Tuple2[RetailRecommands, String] = {
+
+    println("Now creating a spark instance--------------")
   val conf = new SparkConf().setMaster(MConfig.sparkurl).setAppName("Meglytics Viz")
 
   val sc = new SparkContext(conf)
   sc.addJar("target/scala-2.10/meglyticsvisualizer_2.10-1.0-SNAPSHOT.jar")
 
   println("DONE---")
-
-  // private def buyingbehaviour(product_name: String): ValidationNel[Throwable, RecommendProducts]= {
-
-  def buyingbehaviour(product_id: Int, filename: String): Tuple2[RetailRecommands, String] = {
-
+    
     println("Talking to hadoop, hold thy...")
     
     var productname = ""
@@ -184,7 +192,9 @@ object Retail {
     
     val rc = RetailRecommands(finalList1.toList) 
     //sc.stop()   
-    Tuple2(rc, productname)  
+    val out = Tuple2(rc, productname)
+    sc.stop()
+    out
   }
   
   def toJValue(nres: RetailRecommands): JValue = {
